@@ -1,0 +1,63 @@
+QUERY 1: 
+/* How many orders were completed, cancelled  or returned at the country-level?   ORDERS_TABLE */
+******************************************************************************
+
+WITH t1 AS (
+      SELECT status, COUNT(*) AS Transaction_Status
+      FROM `bigquery-public-data.thelook_ecommerce.orders` 
+      GROUP BY status
+      ORDER BY count(*) DESC
+)
+
+SELECT t1.status AS Status,
+       t1.Transaction_Status AS Records,
+      ROUND(t1.Transaction_Status * 100/ 
+       (SELECT SUM (t1.Transaction_Status) FROM t1),0)  AS Percentage 
+FROM t1;
+
+      
+QUERY 2:
+/* Write a summary of total transactions */
+********************************************************************************************
+WITH
+  a1 AS (
+  SELECT
+    *
+  FROM
+    `bigquery-public-data.thelook_ecommerce.users` AS u
+  INNER JOIN
+    `bigquery-public-data.thelook_ecommerce.orders` AS o
+  ON
+    u.id = o.user_id )
+SELECT
+  a1.country,
+  a1.status,
+  COUNT(a1.status) AS Records
+FROM
+  a1
+GROUP BY
+  a1.country,
+  a1.status
+ORDER BY
+  a1.status;
+  
+  
+ QUERY 3:
+ What are the top 5 most profitable products?
+ ****************************************************************
+ CREATE TABLE e-commerce-analytics-348617.public_data_thelook_ecommerce.profitability AS (
+SELECT category, department,  ROUND(AVG(retail_price - cost),2) AS profit
+ FROM `e-commerce-analytics-348617.public_data_thelook_ecommerce.ecommerce_products` 
+ GROUP BY category, department
+ ORDER BY AVG(retail_price - cost) DESC
+ LIMIT 5
+);
+
+
+QUERY 4:
+Show the distinct list of countries in the dataset
+**************************************************
+SELECT
+  DISTINCT(country)
+FROM
+  `bigquery-public-data.thelook_ecommerce.users` ;
